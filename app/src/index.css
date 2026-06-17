@@ -1,0 +1,111 @@
+:root {
+  --bg: #f3f2f1;
+  --surface: #ffffff;
+  --ink: #201f1e;
+  --muted: #605e5c;
+  --line: #e1dfdd;
+  --brand: #0f4c81;
+  --brand-2: #1d6fb8;
+  --accent: #c8102e; /* Contoso Reinsurance red */
+  --good: #107c10;
+  --warn: #c19c00;
+  --bad: #a4262c;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); }
+
+.app { max-width: 1280px; margin: 0 auto; padding: 16px; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+  color: #fff; border-radius: 12px; padding: 14px 18px; margin-bottom: 14px;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,.18);
+  display: grid; place-items: center; font-weight: 700; letter-spacing: .5px;
+}
+.brand-title { font-size: 18px; font-weight: 600; }
+.brand-sub { font-size: 12px; opacity: .85; }
+.data-badge { font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+.data-live { background: rgba(16,124,16,.25); border: 1px solid rgba(255,255,255,.4); }
+.data-sample { background: rgba(193,156,0,.3); border: 1px solid rgba(255,255,255,.4); }
+
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
+.kpi-num { font-size: 26px; font-weight: 700; color: var(--brand); }
+.kpi-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+
+.layout { display: grid; grid-template-columns: 340px 1fr; gap: 14px; align-items: start; }
+
+.list-pane { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.list-controls { display: flex; gap: 8px; padding: 12px; border-bottom: 1px solid var(--line); }
+.search, .filter { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; }
+.search { flex: 1; }
+
+.claim-list { list-style: none; margin: 0; padding: 0; max-height: 70vh; overflow: auto; }
+.claim-item { padding: 12px 14px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.claim-item:hover { background: #faf9f8; }
+.claim-item.active { background: #eef5fb; border-left: 3px solid var(--brand-2); }
+.claim-item-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.case-id { font-family: "Cascadia Code", Consolas, monospace; font-size: 12px; color: var(--muted); }
+.claim-item-name { font-weight: 600; margin: 3px 0; }
+.claim-item-meta { display: flex; gap: 10px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+
+.detail-pane { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; min-height: 70vh; }
+.detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.detail h1 { margin: 0 0 6px; font-size: 22px; }
+.detail-sub { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--muted); }
+
+.triage-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+.triage-btn {
+  padding: 7px 12px; border: 1px solid var(--line); background: #fff; border-radius: 8px;
+  font: inherit; cursor: pointer;
+}
+.triage-btn:hover:not(:disabled) { border-color: var(--brand-2); color: var(--brand-2); }
+.triage-btn.current { background: var(--brand); color: #fff; border-color: var(--brand); }
+.triage-btn:disabled { cursor: default; }
+
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.card { background: #fbfbfa; border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+.card h3 { margin: 0 0 8px; font-size: 14px; color: var(--brand); }
+.card p { margin: 0 0 6px; line-height: 1.45; }
+.kv b { display: inline-block; width: 80px; color: var(--muted); font-weight: 600; }
+.muted { color: var(--muted); }
+
+.grid { width: 100%; border-collapse: collapse; font-size: 13px; }
+.grid th, .grid td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.grid th { color: var(--muted); font-weight: 600; }
+.grid code { background: #eef1f4; padding: 1px 6px; border-radius: 5px; }
+
+.pill { font-size: 11px; padding: 2px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+.pill-s1 { background: #deecf9; color: #0f4c81; }
+.pill-s2 { background: #fff4ce; color: #835c00; }
+.pill-s3 { background: #dff6dd; color: #107c10; }
+.pill-s4 { background: #f3e8ff; color: #6b1fb1; }
+.pill-s5 { background: #e0f0ff; color: #1d6fb8; }
+.pill-s6 { background: #edebe9; color: #605e5c; }
+.pill-simple { background: #dff6dd; color: #107c10; }
+.pill-standard { background: #fff4ce; color: #835c00; }
+.pill-complex { background: #fde7e9; color: #a4262c; }
+.pill-doc1 { background: #dff6dd; color: #107c10; }
+.pill-doc2 { background: #fde7e9; color: #a4262c; }
+.pill-doc3 { background: #fff4ce; color: #835c00; }
+.pill-primary { background: var(--brand); color: #fff; }
+.warn-tag { background: #fde7e9; color: #a4262c; font-size: 11px; padding: 2px 8px; border-radius: 999px; margin-left: 8px; }
+
+.report-link {
+  display: inline-block; margin-top: 8px; color: var(--brand-2); text-decoration: none; font-weight: 600;
+}
+.report-link:hover { text-decoration: underline; }
+
+.empty { padding: 40px; text-align: center; color: var(--muted); }
+
+@media (max-width: 920px) {
+  .layout { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .cards { grid-template-columns: 1fr; }
+}

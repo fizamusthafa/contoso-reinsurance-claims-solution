@@ -1,0 +1,34 @@
+{
+  "appId": "",
+  "appDisplayName": "Contoso Reinsurance Claims",
+  "description": "Adjuster workbench for Contoso Reinsurance claims triage",
+  "environmentId": "",
+  "buildPath": "./dist",
+  "buildEntryPoint": "index.html",
+  "logoPath": "Default",
+  "localAppUrl": "http://localhost:3000",
+  "connectionReferences": {},
+  "databaseReferences": {
+    "default.cds": {
+      "databaseDetails": null,
+      "dataSources": {
+        "claims": {
+          "entitySetName": "uw_submissions",
+          "logicalName": "uw_submission",
+          "isHidden": false
+        },
+        "claimdocuments": {
+          "entitySetName": "uw_submissiondocuments",
+          "logicalName": "uw_submissiondocument",
+          "isHidden": false
+        },
+        "lossclassifications": {
+          "entitySetName": "uw_classificationmatchs",
+          "logicalName": "uw_classificationmatch",
+          "isHidden": false
+        }
+      },
+      "actions": null
+    }
+  }
+}
