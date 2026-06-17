@@ -90,19 +90,28 @@ Save each flow and **turn it on**.
 
 ## 5. Add the shared‑mailbox trigger
 
-The inbound trigger is added through Copilot Studio so it binds cleanly to the agent.
+Claims should arrive in a **shared mailbox** (e.g. `claims@yourtenant.onmicrosoft.com`), not
+a personal inbox. The agent's own *Add trigger* picker only offers the personal‑inbox
+*When a new email arrives (V3)* trigger, so the shared mailbox is wired with a small
+**standalone cloud flow** that calls the agent. A ready‑to‑edit definition is provided at
+[`solution/triggers/WhenANewEmailArrivesInSharedMailbox.flow.json`](../solution/triggers/WhenANewEmailArrivesInSharedMailbox.flow.json).
 
-1. Open the agent in **Copilot Studio → Overview → Triggers → Add trigger**.
-2. Choose **When a new email arrives in a shared mailbox (V2)** (Office 365 Outlook).
-3. Sign in / pick the Office 365 Outlook connection.
-4. Set **Original Mailbox Address** to your claims shared mailbox, for example
-   `claims@yourtenant.onmicrosoft.com`. Optionally set a subject filter such as `Claim`.
-5. In the message/payload step, keep the instruction that passes the email content to the
-   agent (`Use content from <email>`).
-6. **Create trigger**, then **turn the generated flow on** in Power Automate.
+Create it in **Power Automate → Create → Automated cloud flow**:
 
-> Why this way: hand‑authored event triggers do not reliably bind to the agent on import,
-> so the trigger is added in the UI where the binding and the connection are created for you.
+1. Trigger: **Office 365 Outlook → When a new email arrives in a shared mailbox (V2)**.
+2. **Original Mailbox Address** = your claims shared mailbox, e.g.
+   `claims@yourtenant.onmicrosoft.com`. Set **Subject Filter** to `Claim` and
+   **Include Attachments** to *Yes*.
+   - The connection owner must have **Full Access** to that shared mailbox.
+3. Add action **Microsoft Copilot Studio → Run a prompt / "Sends a prompt to the specified
+   copilot for processing"**, target the **Contoso Reinsurance Claims Processor** agent, and
+   set the message to `Use content from @{triggerBody()}`.
+4. **Save**, then **turn the flow on**.
+
+> The solution ships **without** a personal‑inbox trigger flow on purpose — you add the
+> shared‑mailbox flow here so claims are pulled from the right mailbox from day one. The
+> agent itself is invoked by the *Sends a prompt…* action, so it does not need the mailbox
+> trigger to live inside its own trigger list.
 
 ---
 
