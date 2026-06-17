@@ -28,7 +28,6 @@ plus the setup documentation you need to stand it up in your own environment.
 | Table | **Claim** (`uw_submission`) | One row per claim, with a `Case ID` alternate key (`CLM-…`) |
 | Table | **Claim Document** (`uw_submissiondocument`) | Child rows, one per provided/missing document |
 | Table | **Loss Classification** (`uw_classificationmatch`) | Child rows, top‑3 cause‑of‑loss matches |
-| Model‑driven app | **Contoso Reinsurance Claims** | Adjuster workbench over the three tables |
 | Knowledge | 6 Word documents | Region map, adjuster table, cause‑of‑loss reference, document checklist, reserve rules |
 | Code app | **Contoso Reinsurance Claims** | React + TypeScript adjuster workbench over the three tables (in [`/app`](./app)) |
 
@@ -85,14 +84,13 @@ short version:
 # 1. Authenticate to the target environment
 pac auth create --environment https://<your-org>.crm.dynamics.com/
 
-# 2. Import the solution (tables, agent, flows, AI model, app)
-pac solution import --path .\solution\ContosoReinsuranceClaims_managed.zip --publish-changes
-#    (the unmanaged build is also provided for dev environments)
+# 2. Import the solution (tables, agent, flows, AI model)
+pac solution import --path .\solution\ContosoReinsuranceClaims_unmanaged.zip --publish-changes
+#    (generate a managed copy with `pac solution export ... --managed true` for prod)
 ```
 
-After import you finish the wiring in the maker portals (connections, shared‑mailbox
-trigger, turning the flows on, publishing the agent). Those steps — and why each one is
-needed — are in the [Deployment Guide](./docs/DeploymentGuide.md).
+Then deploy the code app from [`/app`](./app) with `pac code push`, and finish the wiring
+(connections, shared‑mailbox trigger, turning the flows on, publishing the agent).
 
 Related reading:
 
