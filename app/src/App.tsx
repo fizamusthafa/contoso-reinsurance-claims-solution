@@ -264,7 +264,7 @@ function ClaimDetail({
       </div>
 
       <div className="card">
-        <h3>✉ Original email</h3>
+        <h3>✉ Email thread</h3>
         {claim.uw_emailsubject || claim.uw_emailbody ? (
           <>
             <p className="kv muted">
