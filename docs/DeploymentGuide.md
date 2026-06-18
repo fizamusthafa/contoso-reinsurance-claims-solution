@@ -88,30 +88,35 @@ Save each flow and **turn it on**.
 
 ---
 
-## 5. Add the shared‑mailbox trigger
+## 5. Point the inbound trigger at your claims shared mailbox
 
-Claims should arrive in a **shared mailbox** (e.g. `claims@yourtenant.onmicrosoft.com`), not
-a personal inbox. The agent's own *Add trigger* picker only offers the personal‑inbox
-*When a new email arrives (V3)* trigger, so the shared mailbox is wired with a small
-**standalone cloud flow** that calls the agent. A ready‑to‑edit definition is provided at
+Claims should land in a **shared mailbox** (e.g. `claims@yourtenant.onmicrosoft.com`), not a
+personal inbox. Two constraints shape how this is wired:
+
+- The agent's **Add trigger** picker only offers the personal‑inbox *When a new email arrives
+  (V3)* trigger — there is no shared‑mailbox option there.
+- The generic Power Automate action picker does **not** expose the *Sends a prompt to the
+  specified copilot* action — Copilot Studio injects it. So you can't build a fully
+  standalone flow that calls the agent from scratch.
+
+The reliable approach is therefore to **edit the agent's trigger flow** and swap only its
+trigger, keeping the injected Copilot action. A reference definition is at
 [`solution/triggers/WhenANewEmailArrivesInSharedMailbox.flow.json`](../solution/triggers/WhenANewEmailArrivesInSharedMailbox.flow.json).
 
-Create it in **Power Automate → Create → Automated cloud flow**:
+1. Open the agent in **Copilot Studio → Triggers**, click the *When a new email arrives*
+   trigger to open its flow in **Power Automate**, and choose **Edit**.
+2. In the v3 designer, **right‑click the trigger node → Delete** (the *Sends a prompt to the
+   specified copilot* action stays).
+3. Click **Add a trigger** and pick **Office 365 Outlook → When a new email arrives in a
+   shared mailbox (V2)**.
+4. Set **Original Mailbox Address** to your claims shared mailbox, e.g.
+   `claims@yourtenant.onmicrosoft.com`. Optionally add **Subject Filter** `Claim` and set
+   **Include Attachments** to *Yes*. The connection owner must have **Full Access** to the
+   mailbox.
+5. **Save** → run **Flow checker** (expect 0 errors) → **Publish** → **Turn on**.
 
-1. Trigger: **Office 365 Outlook → When a new email arrives in a shared mailbox (V2)**.
-2. **Original Mailbox Address** = your claims shared mailbox, e.g.
-   `claims@yourtenant.onmicrosoft.com`. Set **Subject Filter** to `Claim` and
-   **Include Attachments** to *Yes*.
-   - The connection owner must have **Full Access** to that shared mailbox.
-3. Add action **Microsoft Copilot Studio → Run a prompt / "Sends a prompt to the specified
-   copilot for processing"**, target the **Contoso Reinsurance Claims Processor** agent, and
-   set the message to `Use content from @{triggerBody()}`.
-4. **Save**, then **turn the flow on**.
-
-> The solution ships **without** a personal‑inbox trigger flow on purpose — you add the
-> shared‑mailbox flow here so claims are pulled from the right mailbox from day one. The
-> agent itself is invoked by the *Sends a prompt…* action, so it does not need the mailbox
-> trigger to live inside its own trigger list.
+> The `Use content from @{triggerBody()}` input on the Copilot action is generic, so it keeps
+> working after the trigger swap.
 
 ---
 

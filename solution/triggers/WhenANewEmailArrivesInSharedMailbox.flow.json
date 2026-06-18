@@ -1,4 +1,5 @@
 {
+  "_comment": "Reference definition for the inbound trigger flow used by the Contoso Reinsurance Claims Processor. The agent's own Add-trigger picker only offers the PERSONAL-inbox 'When a new email arrives (V3)' trigger, and the generic Power Automate action picker does NOT expose the 'Sends a prompt to the specified copilot' action (Copilot Studio injects it). So to monitor a SHARED mailbox you EDIT the agent-bound trigger flow: delete its V3 trigger and add this shared-mailbox (V2) trigger, keeping the existing Copilot action. See docs/DeploymentGuide.md step 5.",
   "properties": {
     "connectionReferences": {
       "shared_microsoftcopilotstudio": {
@@ -6,18 +7,14 @@
         "connection": {
           "connectionReferenceLogicalName": "new_sharedmicrosoftcopilotstudio_50e8f"
         },
-        "api": {
-          "name": "shared_microsoftcopilotstudio"
-        }
+        "api": { "name": "shared_microsoftcopilotstudio" }
       },
       "shared_office365": {
         "runtimeSource": "embedded",
         "connection": {
           "connectionReferenceLogicalName": "cref8_agent.cr._5n_A5cP"
         },
-        "api": {
-          "name": "shared_office365"
-        }
+        "api": { "name": "shared_office365" }
       }
     },
     "definition": {
@@ -33,7 +30,7 @@
           "inputs": {
             "host": {
               "connectionName": "shared_office365",
-              "operationId": "OnNewEmailV2SharedMailbox",
+              "operationId": "SharedMailboxOnNewEmailV2",
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
             },
             "parameters": {
