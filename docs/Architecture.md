@@ -43,6 +43,7 @@ erDiagram
         memo    uw_executivesummary
         memo    uw_reporttext
         string  uw_reporturl
+        string  uw_conversationid "Outlook thread key (reply bucketing)"
     }
     CLAIM_DOCUMENT {
         string uw_name "document name"
@@ -76,6 +77,13 @@ detected language while corresponding in EN). The agent itself always converses 
 **Trigger added via the UI.** Copilot Studio event triggers don't bind reliably to the agent
 when hand‑authored in the solution XML, so the inbound shared‑mailbox trigger is added in
 Copilot Studio during setup, where the binding, flow and connection are generated correctly.
+
+**Reply threading and deterministic extraction.** A planned upgrade adds reply bucketing (a
+follow‑up email attaches to its existing claim via `uw_conversationid`) and moves extraction
+into the trigger flow as two AI Builder prompts — one for emails with attachments, one for
+body‑only — with the attachment inventory read from the Outlook connector rather than the
+model. The column ships in solution 1.0.0.6; the flow rewire is documented separately. See
+[Threading-and-Extraction.md](Threading-and-Extraction.md).
 
 ## Sequence (happy path)
 

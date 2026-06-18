@@ -1,0 +1,197 @@
+{
+  "_comment": "REFERENCE definition for the upgraded inbound trigger flow. It adds two capabilities on top of WhenANewEmailArrivesInSharedMailbox.flow.json: (1) reply BUCKETING - replies on the same Outlook conversation are attached to the EXISTING Claim instead of creating a new one, keyed on uw_conversationid; (2) DETERMINISTIC extraction - the flow itself runs one of two AI Builder extract prompts (with-attachments vs body-only) chosen on the connector's Has Attachment flag, then hands a clean structured payload to the agent for knowledge-grounded reasoning + report (the hybrid model). The attachment inventory comes from the Outlook Attachments[] array, NOT the LLM. Build this by editing the agent-bound trigger flow in Copilot Studio - see docs/Threading-and-Extraction.md. Replace <ENV>, <EXTRACT_WITH_ATTACHMENTS_MODEL_ID>, <EXTRACT_BODY_ONLY_MODEL_ID>, and the mailbox address with your values.",
+  "properties": {
+    "connectionReferences": {
+      "shared_microsoftcopilotstudio": {
+        "runtimeSource": "embedded",
+        "connection": { "connectionReferenceLogicalName": "new_sharedmicrosoftcopilotstudio_50e8f" },
+        "api": { "name": "shared_microsoftcopilotstudio" }
+      },
+      "shared_office365": {
+        "runtimeSource": "embedded",
+        "connection": { "connectionReferenceLogicalName": "cref8_agent.cr._5n_A5cP" },
+        "api": { "name": "shared_office365" }
+      },
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": { "connectionReferenceLogicalName": "cref8_agent.cr.UrlYxTST" },
+        "api": { "name": "shared_commondataserviceforapps" }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": { "defaultValue": {}, "type": "Object" },
+        "$authentication": { "defaultValue": {}, "type": "SecureObject" }
+      },
+      "triggers": {
+        "When_a_new_email_arrives_in_a_shared_mailbox_(V2)": {
+          "type": "OpenApiConnectionNotification",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_office365",
+              "operationId": "SharedMailboxOnNewEmailV2",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
+            },
+            "parameters": {
+              "mailboxAddress": "claims@yourtenant.onmicrosoft.com",
+              "includeAttachments": true,
+              "subjectFilter": "Claim"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "_01_Find_existing_claim_for_this_conversation": {
+          "_comment": "BUCKETING lookup. conversationId from the Outlook trigger is the thread key. If a Claim already carries this uw_conversationid, the inbound mail is a reply and must be attached to it - not turned into a new claim.",
+          "runAfter": {},
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "ListRecords",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "entityName": "uw_submissions",
+              "$filter": "uw_conversationid eq '@{triggerOutputs()?['body/conversationId']}'",
+              "$select": "uw_submissionid,uw_caseid,uw_conversationid",
+              "$top": 1
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "_02_Is_this_a_reply_to_an_existing_claim": {
+          "runAfter": { "_01_Find_existing_claim_for_this_conversation": [ "Succeeded" ] },
+          "type": "If",
+          "expression": {
+            "greater": [ "@length(outputs('_01_Find_existing_claim_for_this_conversation')?['body/value'])", 0 ]
+          },
+          "actions": {
+            "_R1_Append_reply_to_existing_claim": {
+              "_comment": "REPLY PATH. Attach new info to the existing Claim: append the reply body to uw_emailbody, and add one Claim Document row per NEW attachment (inventory taken from the Outlook Attachments[] array, fully deterministic). Optionally bump uw_triagestatus to 'In Review'. No new Claim is created.",
+              "runAfter": {},
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "UpdateRecord",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "uw_submissions",
+                  "recordId": "@{first(outputs('_01_Find_existing_claim_for_this_conversation')?['body/value'])?['uw_submissionid']}",
+                  "item/uw_triagestatus": 2
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "_R2_For_each_attachment_add_claim_document": {
+              "runAfter": { "_R1_Append_reply_to_existing_claim": [ "Succeeded" ] },
+              "type": "Foreach",
+              "foreach": "@triggerOutputs()?['body/attachments']",
+              "actions": {
+                "_R3_Create_claim_document": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "CreateRecord",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "entityName": "uw_submissiondocuments",
+                      "item/uw_name": "@{items('_R2_For_each_attachment_add_claim_document')?['name']}",
+                      "item/uw_documenttype": "@{items('_R2_For_each_attachment_add_claim_document')?['contentType']}",
+                      "item/uw_status": 1,
+                      "item/uw_submissionid@odata.bind": "uw_submissions(@{first(outputs('_01_Find_existing_claim_for_this_conversation')?['body/value'])?['uw_submissionid']})"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "actions": {
+              "_N1_Branch_on_attachments": {
+                "_comment": "NEW CLAIM PATH. Deterministic split: the connector's Has Attachment flag (NOT the LLM) decides which extract prompt runs.",
+                "runAfter": {},
+                "type": "If",
+                "expression": { "equals": [ "@triggerOutputs()?['body/hasAttachments']", true ] },
+                "actions": {
+                  "_N2a_Extract_with_attachments": {
+                    "_comment": "AI Builder prompt tuned for emails WITH attachments. Inputs: subject, body, sender, receivedDateTime, and the attachment list (names + types + extracted text). Returns the structured claim JSON.",
+                    "runAfter": {},
+                    "type": "OpenApiConnection",
+                    "inputs": {
+                      "host": {
+                        "connectionName": "shared_commondataserviceforapps",
+                        "operationId": "PredictV2",
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                      },
+                      "parameters": {
+                        "modelId": "<EXTRACT_WITH_ATTACHMENTS_MODEL_ID>",
+                        "request/subject": "@{triggerOutputs()?['body/subject']}",
+                        "request/body": "@{triggerOutputs()?['body/body']}",
+                        "request/from": "@{triggerOutputs()?['body/from']}",
+                        "request/receivedDateTime": "@{triggerOutputs()?['body/receivedDateTime']}",
+                        "request/attachments": "@{triggerOutputs()?['body/attachments']}"
+                      },
+                      "authentication": "@parameters('$authentication')"
+                    }
+                  }
+                },
+                "else": {
+                  "actions": {
+                    "_N2b_Extract_body_only": {
+                      "_comment": "AI Builder prompt tuned for emails WITHOUT attachments. Leaner - no attachment slots, so nothing to hallucinate.",
+                      "runAfter": {},
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "PredictV2",
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                        },
+                        "parameters": {
+                          "modelId": "<EXTRACT_BODY_ONLY_MODEL_ID>",
+                          "request/subject": "@{triggerOutputs()?['body/subject']}",
+                          "request/body": "@{triggerOutputs()?['body/body']}",
+                          "request/from": "@{triggerOutputs()?['body/from']}",
+                          "request/receivedDateTime": "@{triggerOutputs()?['body/receivedDateTime']}"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  }
+                }
+              },
+              "_N3_Hand_structured_payload_to_agent": {
+                "_comment": "HYBRID handoff. The flow has already done deterministic extraction + the reliable attachment inventory; the agent now does the knowledge-grounded reasoning (region, cause-of-loss, reserve, adjuster) and calls Generate & Deliver Report. Pass conversationId so the report flow can stamp uw_conversationid on the new Claim - that is what makes the NEXT reply bucket correctly.",
+                "runAfter": { "_N1_Branch_on_attachments": [ "Succeeded" ] },
+                "type": "OpenApiConnection",
+                "inputs": {
+                  "host": {
+                    "connectionName": "shared_microsoftcopilotstudio",
+                    "operationId": "ExecuteCopilot",
+                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_microsoftcopilotstudio"
+                  },
+                  "parameters": {
+                    "Copilot": "cr932_uwSubmissionProcessor",
+                    "body/message": "A new claim email was received and pre-extracted by the flow. conversationId=@{triggerOutputs()?['body/conversationId']}. Structured extraction follows. Run steps 2-10 (region, language, classify, doc check, reserve, assign adjuster, complexity, deliver) using the knowledge sources, and pass uw_conversationid through to Generate & Deliver Report. Extraction JSON: @{coalesce(body('_N2a_Extract_with_attachments'), body('_N2b_Extract_body_only'))}"
+                  },
+                  "authentication": "@parameters('$authentication')"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}
