@@ -129,6 +129,10 @@ export const SAMPLE_CLAIMS: Claim[] = [
     uw_missingdocscount: "2",
     uw_sendername: "Klaus Bauer",
     uw_senderemail: "k.bauer@bay-moebel.de",
+    uw_emailsubject: "Schadenmeldung – Brand Produktionshalle München (Police BM-4471)",
+    uw_emailreceived: "2026-06-17T08:42:00Z",
+    uw_emailbody:
+      "Sehr geehrte Damen und Herren,\n\nhiermit melden wir einen Brandschaden in unserer Finishing-Halle am Standort München. Das Feuer brach am 16.06. gegen 23:10 Uhr aus; die Halle sowie mehrere Fertigungslinien sind betroffen. Der Betrieb ist derzeit unterbrochen.\n\nErste Schätzung des Sachschadens: ca. 4,2 Mio. EUR, zzgl. Betriebsunterbrechung.\n\nBeigefügt finden Sie die Schadenanzeige sowie erste Fotos. Den Gutachterbericht und die Aufstellung des Ertragsausfalls reichen wir nach.\n\nMit freundlichen Grüßen\nKlaus Bauer\nLeiter Facility, Bayerische Möbelwerke GmbH",
     uw_assignmentreasoning:
       "Mario is the senior Bayern adjuster with capacity and German/English fluency.",
     statecode: "Active",
@@ -153,6 +157,10 @@ export const SAMPLE_CLAIMS: Claim[] = [
     uw_missingdocscount: "0",
     uw_sendername: "Petra Schmidt",
     uw_senderemail: "p.schmidt@rhein-log.de",
+    uw_emailsubject: "Wasserschaden Lager Köln – Rohrbruch (Police RL-2208)",
+    uw_emailreceived: "2026-06-17T06:15:00Z",
+    uw_emailbody:
+      "Guten Morgen,\n\nin unserem Lager in Köln ist heute Nacht ein Rohr geplatzt. Das Wasser hat einen Teil der Lagerfläche überflutet. Die Reparatur ist bereits beauftragt.\n\nAlle erforderlichen Unterlagen (Schadenanzeige und Kostenvoranschlag) sind angehängt.\n\nBitte bestätigen Sie den Eingang.\n\nViele Grüße\nPetra Schmidt\nRhein Logistik AG",
     uw_assignmentreasoning: "Lisa covers NRW and had the lowest open caseload.",
     statecode: "Active",
   }),
@@ -176,6 +184,10 @@ export const SAMPLE_CLAIMS: Claim[] = [
     uw_missingdocscount: "1",
     uw_sendername: "Anna Becker",
     uw_senderemail: "a.becker@ftpark.com",
+    uw_emailsubject: "Liability claim – crane damage to neighbouring façade (Policy FTP-9001)",
+    uw_emailreceived: "2026-06-16T14:03:00Z",
+    uw_emailbody:
+      "Hello,\n\nWe are reporting a third-party liability claim. During construction work on 15 June, our crane made contact with the façade of the adjacent building, causing visible damage. The neighbouring owner has issued a demand letter (attached).\n\nWe are still collecting witness statements and will forward them once available.\n\nPlease let us know the next steps.\n\nBest regards,\nAnna Becker\nFrankfurt Tech Park Ltd.",
     uw_assignmentreasoning: "Sydney handles Hessen liability matters.",
     statecode: "Active",
   }),

@@ -76,6 +76,21 @@ body { margin: 0; background: var(--bg); color: var(--ink); }
 .kv b { display: inline-block; width: 80px; color: var(--muted); font-weight: 600; }
 .muted { color: var(--muted); }
 
+.email-body {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  background: #f6f8fa;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
 .grid { width: 100%; border-collapse: collapse; font-size: 13px; }
 .grid th, .grid td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .grid th { color: var(--muted); font-weight: 600; }

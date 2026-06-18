@@ -187,6 +187,12 @@ export default function App() {
   );
 }
 
+function fmtDate(v: string): string {
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return v;
+  return d.toLocaleString("de-DE", { dateStyle: "medium", timeStyle: "short" });
+}
+
 function ClaimDetail({
   claim,
   docs,
@@ -255,6 +261,27 @@ function ClaimDetail({
           <p className="kv"><b>Name</b> {claim.uw_sendername || "—"}</p>
           <p className="kv"><b>Email</b> {claim.uw_senderemail || "—"}</p>
         </div>
+      </div>
+
+      <div className="card">
+        <h3>✉ Original email</h3>
+        {claim.uw_emailsubject || claim.uw_emailbody ? (
+          <>
+            <p className="kv muted">
+              <b>From</b> {claim.uw_sendername || "—"}
+              {claim.uw_senderemail ? ` <${claim.uw_senderemail}>` : ""}
+              {claim.uw_emailreceived ? `  ·  ${fmtDate(claim.uw_emailreceived)}` : ""}
+            </p>
+            <p><b>{claim.uw_emailsubject || "(no subject)"}</b></p>
+            {claim.uw_emailbody ? (
+              <pre className="email-body">{claim.uw_emailbody}</pre>
+            ) : (
+              <p className="muted">No email body captured.</p>
+            )}
+          </>
+        ) : (
+          <p className="muted">No original email captured.</p>
+        )}
       </div>
 
       <div className="card">
